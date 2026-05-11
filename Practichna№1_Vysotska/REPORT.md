@@ -89,4 +89,4 @@ DateOfBirth, що забезпечує точність до дня.
 
 Використання модифікаторів init та required (C# 11+). Роботу з регулярними виразами (Regex) для перевірки форматів. Серіалізацію об'єктів у формат JSON за допомогою бібліотеки Newtonsoft.Json. Управління складними проєктами через Git з використанням системи гілок (feature-branches).
 
-5. Посилання на репозиторій: https://github.com/ilyablackbox-creator/Prachtichna-robota-1
+5. Посилання на репозиторій: https://github.com/DarkkkSonick/Practichna-1_Vysotska-

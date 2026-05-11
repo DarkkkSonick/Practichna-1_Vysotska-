@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Text;
 using System.Text.RegularExpressions;
 
-public class Student
+public class Student : ICloneable
 {
     public enum StudentStatus
     {
@@ -20,13 +21,18 @@ public class Student
     private string _personalEmail;
     private string _notes;
 
+    public byte[] LabGrades { get; set; } = new byte[10];
+
+    public int PortRow { get; set; } = -1;
+    public int PortCol { get; set; } = -1;
+
     public required string PersonalEmail
     {
         get => _personalEmail;
         init
         {
             if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException();
+                throw new ArgumentException("Неправильний email");
             _personalEmail = value;
         }
     }
@@ -43,7 +49,7 @@ public class Student
         set
         {
             if (string.IsNullOrWhiteSpace(value) || value.Length < 5)
-                throw new ArgumentException();
+                throw new ArgumentException("ПІБ закороткий");
             _fullName = value;
         }
     }
@@ -54,7 +60,7 @@ public class Student
         set
         {
             if (!Regex.IsMatch(value, @"^\d{8}$"))
-                throw new ArgumentException();
+                throw new ArgumentException("Заліковка має містити 8 цифр");
             _recordBookNumber = value;
         }
     }
@@ -89,7 +95,10 @@ public class Student
     {
         var today = DateTime.Today;
         var age = today.Year - _dateOfBirth.Year;
-        if (_dateOfBirth.Date > today.AddYears(-age)) age--;
+
+        if (_dateOfBirth.Date > today.AddYears(-age))
+            age--;
+
         return age;
     }
 
@@ -97,30 +106,44 @@ public class Student
     {
         if (newGrade < 0 || newGrade > 100)
             throw new ArgumentOutOfRangeException();
+
         AverageGrade = newGrade;
+    }
+
+    public void AddLabGrade(int labNumber, byte grade)
+    {
+        if (labNumber < 0 || labNumber >= 10)
+            throw new IndexOutOfRangeException();
+
+        LabGrades[labNumber] = grade;
+    }
+
+    public double GetAverageLabGrade()
+    {
+        return Math.Round(LabGrades.Average(x => x), 2);
     }
 
     public bool IsExcellent() => AverageGrade >= 90;
 
     public bool IsFailing() => AverageGrade < 60;
 
-    public int GetYearsToGraduation()
-    {
-        if (Status == StudentStatus.Graduated || Status == StudentStatus.Expelled) return 0;
-        int yearsSpent = DateTime.Now.Year - EnrollmentDate.Year;
-        int remaining = 4 - yearsSpent;
-        return remaining > 0 ? remaining : 0;
-    }
-
     public void ShowDetailedInfo()
     {
-        Console.WriteLine($"Name: {FullName}");
-        Console.WriteLine($"Age: {Age} (Born: {DateOfBirth:yyyy-MM-dd})");
-        Console.WriteLine($"Status: {Status}");
-        Console.WriteLine($"Enrollment: {EnrollmentDate:yyyy-MM-dd}");
-        Console.WriteLine($"Record Book: {RecordBookNumber}");
-        Console.WriteLine($"Grade: {AverageGrade}");
-        Console.WriteLine($"Email: {PersonalEmail}");
-        Console.WriteLine($"Notes: {Notes}");
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine($"Name: {FullName}");
+        sb.AppendLine($"Age: {Age}");
+        sb.AppendLine($"Record Book: {RecordBookNumber}");
+        sb.AppendLine($"Grade: {AverageGrade}");
+        sb.AppendLine($"Average Lab Grade: {GetAverageLabGrade()}");
+        sb.AppendLine($"Email: {PersonalEmail}");
+        sb.AppendLine($"Status: {Status}");
+
+        Console.WriteLine(sb.ToString());
+    }
+
+    public object Clone()
+    {
+        return MemberwiseClone();
     }
 }

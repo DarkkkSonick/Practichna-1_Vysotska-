@@ -7,13 +7,28 @@ using System.Text.Json;
 public class StudentGroup
 {
     private List<Student> _students = new List<Student>();
-
+    private PortMatrix portMatrix = new PortMatrix();
     public string GroupName { get; set; }
     public string Specialty { get; set; }
     public int Course { get; set; }
 
     public int GroupSize => _students.Count;
+    public void AssignStudentToPort(Student s, int row, int col)
+    {
+        s.PortRow = row;
+        s.PortCol = col;
+    }
 
+    public List<Student> GetStudentsByPortStatus(bool isOpen)
+    {
+        return _students.Where(s =>
+        {
+            if (s.PortRow == -1 || s.PortCol == -1)
+                return false;
+
+            return isOpen;
+        }).ToList();
+    }
     public double AverageGroupGrade
     {
         get
@@ -85,4 +100,5 @@ public class StudentGroup
             _students = JsonSerializer.Deserialize<List<Student>>(jsonString) ?? new List<Student>();
         }
     }
+    
 }

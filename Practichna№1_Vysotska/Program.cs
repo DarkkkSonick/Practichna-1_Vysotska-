@@ -4,6 +4,8 @@ using System.Linq;
 
 class Program
 {
+    static PortMatrix matrix = new PortMatrix();
+    static PortLogger logger = new PortLogger();
     static StudentGroup group = new StudentGroup();
     static string fileName = "students.json";
 
@@ -22,6 +24,10 @@ class Program
             Console.WriteLine("7. Статистика групи");
             Console.WriteLine("8. Зберегти дані");
             Console.WriteLine("9. Завантажити дані");
+            Console.WriteLine("10. Відкрити порт");
+            Console.WriteLine("11. Записати дані в порт");
+            Console.WriteLine("12. Показати матрицю");
+            Console.WriteLine("13. Лог портів");
             Console.WriteLine("0. Вийти");
             Console.Write("\nОберіть дію: ");
 
@@ -37,6 +43,10 @@ class Program
                 case "7": ShowStatistics(); break;
                 case "8": group.SaveToFile(fileName); break;
                 case "9": group.LoadFromFile(fileName); break;
+                case "10":OpenPort();break;
+                case "11":WritePort();break;
+                case "12":matrix.ScanMatrix();break;
+                case "13":Console.WriteLine(logger.GetFullLog());break;
                 case "0": return;
             }
             Console.WriteLine("\nНатисніть будь-яку клавішу...");
@@ -142,4 +152,31 @@ class Program
         if (group.RemoveStudent(record)) Console.WriteLine("Видалено.");
         else Console.WriteLine("Не знайдено.");
     }
+        static void OpenPort()
+        {
+            Console.Write("Row: ");
+            int r = int.Parse(Console.ReadLine());
+
+            Console.Write("Col: ");
+            int c = int.Parse(Console.ReadLine());
+
+            matrix.OpenPort(r, c);
+
+            logger.LogOperation("OPEN", r * 16 + c, "Порт відкрито");
+        }
+
+        static void WritePort()
+        {
+            Console.Write("Row: ");
+            int r = int.Parse(Console.ReadLine());
+
+            Console.Write("Col: ");
+            int c = int.Parse(Console.ReadLine());
+
+            byte[] data = { 1, 2, 3, 4 };
+
+            matrix.WriteToPort(r, c, data);
+
+            logger.LogOperation("WRITE", r * 16 + c, "Записані дані");
+        }
 }

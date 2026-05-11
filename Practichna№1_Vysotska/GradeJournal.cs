@@ -19,3 +19,4 @@ public class GradeJournal
     }
 
     public Dictionary<string, double> GetAllGrades() => new Dictionary<string, double>(_subjects);
+}
