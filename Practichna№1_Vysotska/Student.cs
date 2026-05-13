@@ -1,16 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Linq;
 
-public class Student : ICloneable
+public class Student
 {
-    public enum StudentStatus
-    {
-        Active,
-        AcademicLeave,
-        Expelled,
-        Graduated
-    }
+    public enum StudentStatus { Active, AcademicLeave, Expelled, Graduated }
 
     private string _fullName;
     private string _recordBookNumber;
@@ -19,12 +15,10 @@ public class Student : ICloneable
     private StudentStatus _status;
     private DateTime _enrollmentDate;
     private string _personalEmail;
-    private string _notes;
+    private string _notes = "";
 
-    public byte[] LabGrades { get; set; } = new byte[10];
-
-    public int PortRow { get; set; } = -1;
-    public int PortCol { get; set; } = -1;
+    public int CourseProgress { get; set; }
+    public List<GradePoint> GradeHistory { get; set; } = new List<GradePoint>();
 
     public required string PersonalEmail
     {
@@ -32,24 +26,20 @@ public class Student : ICloneable
         init
         {
             if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException("Неправильний email");
+                throw new ArgumentException("Невірний email");
             _personalEmail = value;
         }
     }
 
-    public DateTime EnrollmentDate
-    {
-        get => _enrollmentDate;
-        init => _enrollmentDate = value;
-    }
+    public DateTime EnrollmentDate { get; init; }
 
     public string FullName
     {
         get => _fullName;
         set
         {
-            if (string.IsNullOrWhiteSpace(value) || value.Length < 5)
-                throw new ArgumentException("ПІБ закороткий");
+            if (value.Trim().Split(' ').Length < 3)
+                throw new ArgumentException("Введіть ПІБ повністю");
             _fullName = value;
         }
     }
@@ -60,29 +50,14 @@ public class Student : ICloneable
         set
         {
             if (!Regex.IsMatch(value, @"^\d{8}$"))
-                throw new ArgumentException("Заліковка має містити 8 цифр");
+                throw new ArgumentException("Номер має містити 8 цифр");
             _recordBookNumber = value;
         }
     }
 
-    public DateTime DateOfBirth
-    {
-        get => _dateOfBirth;
-        set => _dateOfBirth = value;
-    }
-
-    public StudentStatus Status
-    {
-        get => _status;
-        set => _status = value;
-    }
-
-    public string Notes
-    {
-        get => _notes;
-        set => _notes = value;
-    }
-
+    public DateTime DateOfBirth { get; init; }
+    public StudentStatus Status { get; set; }
+    public string Notes { get; set; }
     public double AverageGrade
     {
         get => _averageGrade;
@@ -91,59 +66,60 @@ public class Student : ICloneable
 
     public int Age => CalculateAge();
 
-    public int CalculateAge()
+    private int CalculateAge()
     {
         var today = DateTime.Today;
-        var age = today.Year - _dateOfBirth.Year;
-
-        if (_dateOfBirth.Date > today.AddYears(-age))
-            age--;
-
+        int age = today.Year - DateOfBirth.Year;
+        if (DateOfBirth.Date > today.AddYears(-age)) age--;
         return age;
     }
 
     public void UpdateAverageGrade(double newGrade)
     {
-        if (newGrade < 0 || newGrade > 100)
-            throw new ArgumentOutOfRangeException();
-
+        if (newGrade < 0 || newGrade > 100) throw new ArgumentOutOfRangeException();
         AverageGrade = newGrade;
     }
 
-    public void AddLabGrade(int labNumber, byte grade)
+    public static bool operator >(Student s1, Student s2)
     {
-        if (labNumber < 0 || labNumber >= 10)
-            throw new IndexOutOfRangeException();
-
-        LabGrades[labNumber] = grade;
+        if (s1.AverageGrade != s2.AverageGrade) return s1.AverageGrade > s2.AverageGrade;
+        return s1.CourseProgress > s2.CourseProgress;
     }
 
-    public double GetAverageLabGrade()
+    public static bool operator <(Student s1, Student s2) => s2 > s1;
+
+    public static bool operator >=(Student s1, Student s2) => !(s1 < s2);
+
+    public static bool operator <=(Student s1, Student s2) => !(s1 > s2);
+
+    public static bool operator ==(Student s1, Student s2)
     {
-        return Math.Round(LabGrades.Average(x => x), 2);
+        if (ReferenceEquals(s1, s2)) return true;
+        if (s1 is null || s2 is null) return false;
+        return s1.AverageGrade == s2.AverageGrade && s1.CourseProgress == s2.CourseProgress;
     }
 
-    public bool IsExcellent() => AverageGrade >= 90;
+    public static bool operator !=(Student s1, Student s2) => !(s1 == s2);
 
-    public bool IsFailing() => AverageGrade < 60;
+    public static string operator +(Student s1, Student s2) => $"Команда: {s1.FullName} та {s2.FullName}";
 
-    public void ShowDetailedInfo()
+    public override bool Equals(object obj) => obj is Student s && this == s;
+
+    public override int GetHashCode() => HashCode.Combine(AverageGrade, CourseProgress);
+
+    public string GetFormattedInfo(bool detailed = false)
     {
         StringBuilder sb = new StringBuilder();
-
-        sb.AppendLine($"Name: {FullName}");
-        sb.AppendLine($"Age: {Age}");
-        sb.AppendLine($"Record Book: {RecordBookNumber}");
-        sb.AppendLine($"Grade: {AverageGrade}");
-        sb.AppendLine($"Average Lab Grade: {GetAverageLabGrade()}");
-        sb.AppendLine($"Email: {PersonalEmail}");
-        sb.AppendLine($"Status: {Status}");
-
-        Console.WriteLine(sb.ToString());
-    }
-
-    public object Clone()
-    {
-        return MemberwiseClone();
+        sb.AppendLine($"ПІБ: {FullName}");
+        sb.AppendLine($"Заліковка: {RecordBookNumber}");
+        sb.AppendLine($"Бал: {AverageGrade}");
+        if (detailed)
+        {
+            sb.AppendLine($"Email: {PersonalEmail}");
+            sb.AppendLine($"Вік: {Age}");
+            sb.AppendLine($"Прогрес: {CourseProgress}%");
+            sb.AppendLine($"Статус: {Status}");
+        }
+        return sb.ToString();
     }
 }
