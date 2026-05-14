@@ -1,53 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.IO;
 
 public class StudentGroup
 {
-    private List<Student> _students = new List<Student>();
+    private List<UniversityMember> _members = new List<UniversityMember>();
 
     public string GroupName { get; set; } = "К-321";
     public string Specialty { get; set; } = "Комп'ютерна інженерія";
 
-    public int GroupSize => _students.Count;
+    public int GroupSize => _members.Count;
 
-    public double AverageGroupGrade =>
-        _students.Count == 0 ? 0 :
-        Math.Round(_students.Average(s => s.AverageGrade), 2);
-
-    public Student this[string recordNumber]
+    public double AverageGroupGrade
     {
-        get => _students.FirstOrDefault(s => s.RecordBookNumber == recordNumber);
-    }
-
-    public static StudentGroup operator +(StudentGroup g1, StudentGroup g2)
-    {
-        var merged = new StudentGroup
+        get
         {
-            GroupName = $"{g1.GroupName}+{g2.GroupName}",
-            Specialty = g1.Specialty
-        };
-
-        foreach (var s in g1.GetAllStudents()) merged.AddStudent(s);
-        foreach (var s in g2.GetAllStudents()) merged.AddStudent(s);
-
-        return merged;
+            var students = _members.OfType<Student>().ToList();
+            return students.Count == 0 ? 0 : Math.Round(students.Average(s => s.AverageGrade), 2);
+        }
     }
 
-    public void AddStudent(Student s)
+    public void AddMember(UniversityMember member)
     {
-        _students.Add(s);
+        _members.Add(member);
     }
 
-    public bool RemoveStudent(string record)
+    public bool RemoveMember(string recordNumber)
     {
-        var st = _students.FirstOrDefault(s => s.RecordBookNumber == record);
-        if (st != null)
+        var member = _members.OfType<Student>().FirstOrDefault(s => s.RecordBookNumber == recordNumber);
+        if (member != null)
         {
-            _students.Remove(st);
+            _members.Remove(member);
             return true;
         }
         return false;
@@ -55,46 +41,31 @@ public class StudentGroup
 
     public Student FindStudent(string query, bool byNumber = false)
     {
+        var students = _members.OfType<Student>();
         if (byNumber)
-            return _students.FirstOrDefault(s => s.RecordBookNumber == query);
+            return students.FirstOrDefault(s => s.RecordBookNumber == query);
 
-        return _students.FirstOrDefault(s =>
-            s.FullName.Contains(query, StringComparison.OrdinalIgnoreCase));
+        return students.FirstOrDefault(s => s.FullName.Contains(query, StringComparison.OrdinalIgnoreCase));
     }
 
-    public List<Student> GetAllStudents() => _students;
+    public List<Student> GetAllStudents() => _members.OfType<Student>().ToList();
 
-    public List<Student> GetExcellentStudents()
+    public List<UniversityMember> GetAllMembers() => _members;
+
+    public decimal GetTotalScholarship()
     {
-        return _students.Where(s => s.AverageGrade >= 90).ToList();
+        return _members.Sum(m => m.CalculateScholarship());
     }
 
-    public List<Student> GetFailingStudents()
+    public List<T> GetMembersByType<T>() where T : UniversityMember
     {
-        return _students.Where(s => s.AverageGrade < 60).ToList();
-    }
-
-    public Student BestStudent()
-    {
-        if (_students.Count == 0) return null;
-
-        Student best = _students[0];
-        foreach (var s in _students)
-        {
-            if (s > best) best = s;
-        }
-        return best;
-    }
-
-    public StudentGroup MergeGroups(StudentGroup other)
-    {
-        return this + other;
+        return _members.OfType<T>().ToList();
     }
 
     public string SearchByNameFragment(string fragment)
     {
         StringBuilder sb = new StringBuilder();
-        var result = _students.Where(s =>
+        var result = _members.OfType<Student>().Where(s =>
             s.FullName.Contains(fragment, StringComparison.OrdinalIgnoreCase));
 
         foreach (var s in result)
@@ -107,7 +78,7 @@ public class StudentGroup
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("ПІБ,Заліковка,Бал");
-        foreach (var s in _students)
+        foreach (var s in _members.OfType<Student>())
         {
             sb.AppendLine($"{s.FullName},{s.RecordBookNumber},{s.AverageGrade}");
         }
@@ -122,16 +93,8 @@ public class StudentGroup
             string[] data = line.Split(';');
             if (data.Length >= 4)
             {
-                Student s = new Student
-                {
-                    FullName = data[0],
-                    PersonalEmail = data[1],
-                    RecordBookNumber = data[2],
-                    DateOfBirth = DateTime.Parse(data[3]),
-                    EnrollmentDate = DateTime.Now,
-                    Status = Student.StudentStatus.Active
-                };
-                AddStudent(s);
+                Student s = new Student(data[0], DateTime.Parse(data[3]), data[1], data[2]);
+                AddMember(s);
             }
         }
     }
@@ -139,7 +102,7 @@ public class StudentGroup
     public void SaveToFile(string file)
     {
         var options = new JsonSerializerOptions { WriteIndented = true };
-        string json = JsonSerializer.Serialize(_students, options);
+        string json = JsonSerializer.Serialize(_members, options);
         File.WriteAllText(file, json);
     }
 
@@ -148,7 +111,7 @@ public class StudentGroup
         if (File.Exists(file))
         {
             string json = File.ReadAllText(file);
-            _students = JsonSerializer.Deserialize<List<Student>>(json) ?? new List<Student>();
+            _members = JsonSerializer.Deserialize<List<UniversityMember>>(json) ?? new List<UniversityMember>();
         }
     }
 }

@@ -1,0 +1,23 @@
+* [33m8f6fdb2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdevelop[m[33m, [m[1;33mtag: [m[1;33mv4.0[m[33m, [m[1;32mrefactor/operators-cleanup[m[33m)[m refactor: final cleanup of operator logic
+* [33mea15a0e[m feat: add demonstration methods for operators
+* [33ma81da5e[m[33m ([m[1;32mfeature/group-operators[m[33m)[m feat: implement BestStudent method logic
+* [33mc28efdb[m feat: add indexer for record book search
+* [33m9c37ce7[m[33m ([m[1;32mfeature/student-operators[m[33m)[m feat: add GradePoint integration to Student
+* [33mdcd4640[m feat: add GradePoint integration to Student
+* [33m463aff6[m refactor: prepare project structure for PR4
+* [33m6d2a5c1[m[33m ([m[1;33mtag: [m[1;33mv3.0[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mrefactor/final-cleanup[m[33m, [m[1;32mfeature/variant-1[m[33m, [m[1;32mfeature/text-processor-core[m[33m, [m[1;32mfeature/student-string-extensions[m[33m, [m[1;32mfeature/performance-benchmark[m[33m, [m[1;32mfeature/menu-text-module[m[33m, [m[1;32mfeature/group-text-methods[m[33m, [m[1;32mfeature/advanced-logger[m[33m)[m fix: ignore Practichna_3 project folder
+* [33mb9878a9[m feat: add text processor and logger modules
+[31m|[m * [33m72a0d68[m[33m ([m[1;32mfeature/file-storage[m[33m)[m fix: resolve merge conflict in REPORT.md
+[31m|[m [32m|[m *   [33m63a5d1d[m[33m ([m[1;35mrefs/stash[m[33m)[m On develop: Checking out feature/file-storage
+[31m|[m [32m|[m[31m/[m[34m|[m[35m\[m  
+[31m|[m[31m/[m[32m|[m [34m|[m [35m|[m 
+[31m|[m [32m|[m [34m|[m * [33m1d250c4[m untracked files on develop: 9728dc3 feat: add lab grades array
+[31m|[m [32m|[m * [33med87e6d[m index on develop: 9728dc3 feat: add lab grades array
+[31m|[m [32m|[m[31m/[m  
+[31m|[m[31m/[m[32m|[m   
+[31m|[m [32m|[m * [33m2c47677[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m docs: add git log graph image to report
+[31m|[m [32m|[m[31m/[m  
+[31m|[m[31m/[m[32m|[m   
+* [32m|[m [33m9728dc3[m[33m ([m[1;33mtag: [m[1;33mv2.0[m[33m, [m[1;31morigin/feature/student-lab-grades[m[33m, [m[1;32mfeature/student-lab-grades[m[33m, [m[1;32mfeature/refactoring[m[33m, [m[1;32mfeature/persistence[m[33m, [m[1;32mfeature/menu-integration[m[33m)[m feat: add lab grades array
+[32m|[m[32m/[m  
+* [33me44107b[m[33m ([m[1;31morigin/feature/student-class[m[33m, [m[1;31morigin/feature/stringbuilder-logger[m[33m, [m[1;31morigin/feature/port-matrix[m[33m, [m[1;31morigin/feature/group-management[m[33m, [m[1;31morigin/feature/file-storage[m[33m, [m[1;32mfeature/student-class[m[33m, [m[1;32mfeature/stringbuilder-logger[m[33m, [m[1;32mfeature/port-matrix[m[33m, [m[1;32mfeature/group-management[m[33m)[m Initial commit

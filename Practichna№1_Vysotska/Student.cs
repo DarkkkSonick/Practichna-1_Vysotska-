@@ -2,46 +2,27 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Linq;
 
-public class Student
+public class Student : UniversityMember
 {
     public enum StudentStatus { Active, AcademicLeave, Expelled, Graduated }
 
     private string _fullName;
     private string _recordBookNumber;
     private double _averageGrade;
-    private DateTime _dateOfBirth;
     private StudentStatus _status;
-    private DateTime _enrollmentDate;
     private string _personalEmail;
-    private string _notes = "";
 
     public int CourseProgress { get; set; }
     public List<GradePoint> GradeHistory { get; set; } = new List<GradePoint>();
+    public GradeJournal GradeJournal { get; set; } = new GradeJournal();
+    public StudentStatus Status { get; set; }
+    public string Notes { get; set; }
 
-    public required string PersonalEmail
+    public double AverageGrade
     {
-        get => _personalEmail;
-        init
-        {
-            if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException("Невірний email");
-            _personalEmail = value;
-        }
-    }
-
-    public DateTime EnrollmentDate { get; init; }
-
-    public string FullName
-    {
-        get => _fullName;
-        set
-        {
-            if (value.Trim().Split(' ').Length < 3)
-                throw new ArgumentException("Введіть ПІБ повністю");
-            _fullName = value;
-        }
+        get => _averageGrade;
+        private set => _averageGrade = Math.Round(value, 2);
     }
 
     public string RecordBookNumber
@@ -55,23 +36,32 @@ public class Student
         }
     }
 
-    public DateTime DateOfBirth { get; init; }
-    public StudentStatus Status { get; set; }
-    public string Notes { get; set; }
-    public double AverageGrade
+    public int Age
     {
-        get => _averageGrade;
-        private set => _averageGrade = Math.Round(value, 2);
+        get
+        {
+            var today = DateTime.Today;
+            int age = today.Year - DateOfBirth.Year;
+            if (DateOfBirth.Date > today.AddYears(-age)) age--;
+            return age;
+        }
     }
 
-    public int Age => CalculateAge();
-
-    private int CalculateAge()
+    public Student(string fullName, DateTime dob, string email, string recordBook)
+        : base(fullName, dob, email)
     {
-        var today = DateTime.Today;
-        int age = today.Year - DateOfBirth.Year;
-        if (DateOfBirth.Date > today.AddYears(-age)) age--;
-        return age;
+        RecordBookNumber = recordBook;
+        Status = StudentStatus.Active;
+    }
+
+    public override decimal CalculateScholarship()
+    {
+        return AverageGrade >= 90 ? 2000m : 0m;
+    }
+
+    public override string GetInfo()
+    {
+        return GetFormattedInfo(true);
     }
 
     public void UpdateAverageGrade(double newGrade)
@@ -79,33 +69,6 @@ public class Student
         if (newGrade < 0 || newGrade > 100) throw new ArgumentOutOfRangeException();
         AverageGrade = newGrade;
     }
-
-    public static bool operator >(Student s1, Student s2)
-    {
-        if (s1.AverageGrade != s2.AverageGrade) return s1.AverageGrade > s2.AverageGrade;
-        return s1.CourseProgress > s2.CourseProgress;
-    }
-
-    public static bool operator <(Student s1, Student s2) => s2 > s1;
-
-    public static bool operator >=(Student s1, Student s2) => !(s1 < s2);
-
-    public static bool operator <=(Student s1, Student s2) => !(s1 > s2);
-
-    public static bool operator ==(Student s1, Student s2)
-    {
-        if (ReferenceEquals(s1, s2)) return true;
-        if (s1 is null || s2 is null) return false;
-        return s1.AverageGrade == s2.AverageGrade && s1.CourseProgress == s2.CourseProgress;
-    }
-
-    public static bool operator !=(Student s1, Student s2) => !(s1 == s2);
-
-    public static string operator +(Student s1, Student s2) => $"Команда: {s1.FullName} та {s2.FullName}";
-
-    public override bool Equals(object obj) => obj is Student s && this == s;
-
-    public override int GetHashCode() => HashCode.Combine(AverageGrade, CourseProgress);
 
     public string GetFormattedInfo(bool detailed = false)
     {
@@ -122,4 +85,9 @@ public class Student
         }
         return sb.ToString();
     }
+
+    public static bool operator >(Student s1, Student s2) => s1.AverageGrade > s2.AverageGrade;
+    public static bool operator <(Student s1, Student s2) => s1.AverageGrade < s2.AverageGrade;
+    public static bool operator ==(Student s1, Student s2) => s1?.AverageGrade == s2?.AverageGrade;
+    public static bool operator !=(Student s1, Student s2) => !(s1 == s2);
 }
