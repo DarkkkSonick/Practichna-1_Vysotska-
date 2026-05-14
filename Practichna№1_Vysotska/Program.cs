@@ -180,3 +180,4 @@ class Program
             logger.LogOperation("WRITE", r * 16 + c, "Записані дані");
         }
 }
+// Фінальна перевірка ієрархії
