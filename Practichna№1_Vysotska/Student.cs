@@ -1,57 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using YourProjectName;
 
-public class Student : ICloneable
+public class Student : UniversityMember
 {
-    public enum StudentStatus
-    {
-        Active,
-        AcademicLeave,
-        Expelled,
-        Graduated
-    }
+    public List<Shape> Shapes { get; set; } = new List<Shape>();
+    public enum StudentStatus { Active, AcademicLeave, Expelled, Graduated }
 
     private string _fullName;
     private string _recordBookNumber;
     private double _averageGrade;
-    private DateTime _dateOfBirth;
     private StudentStatus _status;
-    private DateTime _enrollmentDate;
     private string _personalEmail;
-    private string _notes;
 
-    public byte[] LabGrades { get; set; } = new byte[10];
+    public int CourseProgress { get; set; }
+    public List<GradePoint> GradeHistory { get; set; } = new List<GradePoint>();
+    public GradeJournal GradeJournal { get; set; } = new GradeJournal();
+    public StudentStatus Status { get; set; }
+    public string Notes { get; set; }
 
-    public int PortRow { get; set; } = -1;
-    public int PortCol { get; set; } = -1;
-
-    public required string PersonalEmail
+    public double AverageGrade
     {
-        get => _personalEmail;
-        init
-        {
-            if (!Regex.IsMatch(value, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                throw new ArgumentException("Неправильний email");
-            _personalEmail = value;
-        }
-    }
-
-    public DateTime EnrollmentDate
-    {
-        get => _enrollmentDate;
-        init => _enrollmentDate = value;
-    }
-
-    public string FullName
-    {
-        get => _fullName;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value) || value.Length < 5)
-                throw new ArgumentException("ПІБ закороткий");
-            _fullName = value;
-        }
+        get => _averageGrade;
+        private set => _averageGrade = Math.Round(value, 2);
     }
 
     public string RecordBookNumber
@@ -60,90 +33,69 @@ public class Student : ICloneable
         set
         {
             if (!Regex.IsMatch(value, @"^\d{8}$"))
-                throw new ArgumentException("Заліковка має містити 8 цифр");
+                throw new ArgumentException("Номер має містити 8 цифр");
             _recordBookNumber = value;
         }
     }
 
-    public DateTime DateOfBirth
+    public int Age
     {
-        get => _dateOfBirth;
-        set => _dateOfBirth = value;
+        get
+        {
+            var today = DateTime.Today;
+            int age = today.Year - DateOfBirth.Year;
+            if (DateOfBirth.Date > today.AddYears(-age)) age--;
+            return age;
+        }
     }
 
-    public StudentStatus Status
+    public Student(string fullName, DateTime dob, string email, string recordBook)
+        : base(fullName, dob, email)
     {
-        get => _status;
-        set => _status = value;
+        RecordBookNumber = recordBook;
+        Status = StudentStatus.Active;
     }
 
-    public string Notes
+    public StudentRecord GetRecord()
     {
-        get => _notes;
-        set => _notes = value;
+        int id = int.TryParse(RecordBookNumber, out int result) ? result : 0;
+        return new StudentRecord(id, FullName);
     }
 
-    public double AverageGrade
+    public override decimal CalculateScholarship()
     {
-        get => _averageGrade;
-        private set => _averageGrade = Math.Round(value, 2);
+        return AverageGrade >= 90 ? 2000m : 0m;
     }
 
-    public int Age => CalculateAge();
-
-    public int CalculateAge()
+    public override string GetInfo()
     {
-        var today = DateTime.Today;
-        var age = today.Year - _dateOfBirth.Year;
-
-        if (_dateOfBirth.Date > today.AddYears(-age))
-            age--;
-
-        return age;
+        return GetFormattedInfo(true);
     }
 
     public void UpdateAverageGrade(double newGrade)
     {
-        if (newGrade < 0 || newGrade > 100)
-            throw new ArgumentOutOfRangeException();
-
+        if (newGrade < 0 || newGrade > 100) throw new ArgumentOutOfRangeException();
         AverageGrade = newGrade;
     }
 
-    public void AddLabGrade(int labNumber, byte grade)
-    {
-        if (labNumber < 0 || labNumber >= 10)
-            throw new IndexOutOfRangeException();
-
-        LabGrades[labNumber] = grade;
-    }
-
-    public double GetAverageLabGrade()
-    {
-        return Math.Round(LabGrades.Average(x => x), 2);
-    }
-
-    public bool IsExcellent() => AverageGrade >= 90;
-
-    public bool IsFailing() => AverageGrade < 60;
-
-    public void ShowDetailedInfo()
+    public string GetFormattedInfo(bool detailed = false)
     {
         StringBuilder sb = new StringBuilder();
-
-        sb.AppendLine($"Name: {FullName}");
-        sb.AppendLine($"Age: {Age}");
-        sb.AppendLine($"Record Book: {RecordBookNumber}");
-        sb.AppendLine($"Grade: {AverageGrade}");
-        sb.AppendLine($"Average Lab Grade: {GetAverageLabGrade()}");
-        sb.AppendLine($"Email: {PersonalEmail}");
-        sb.AppendLine($"Status: {Status}");
-
-        Console.WriteLine(sb.ToString());
+        sb.AppendLine($"ПІБ: {FullName}");
+        sb.AppendLine($"Заліковка: {RecordBookNumber}");
+        sb.AppendLine($"Бал: {AverageGrade}");
+        if (detailed)
+        {
+            sb.AppendLine($"Email: {PersonalEmail}");
+            sb.AppendLine($"Вік: {Age}");
+            sb.AppendLine($"Прогрес: {CourseProgress}%");
+            sb.AppendLine($"Статус: {Status}");
+        }
+        return sb.ToString();
     }
 
-    public object Clone()
-    {
-        return MemberwiseClone();
-    }
+    public static bool operator >(Student s1, Student s2) => s1.AverageGrade > s2.AverageGrade;
+    public static bool operator <(Student s1, Student s2) => s1.AverageGrade < s2.AverageGrade;
+    public static bool operator ==(Student s1, Student s2) => s1?.AverageGrade == s2?.AverageGrade;
+    public static bool operator !=(Student s1, Student s2) => !(s1 == s2);
 }

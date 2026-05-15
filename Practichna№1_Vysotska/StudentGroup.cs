@@ -2,103 +2,184 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
+using YourProjectName;
 
 public class StudentGroup
 {
-    private List<Student> _students = new List<Student>();
-    private PortMatrix portMatrix = new PortMatrix();
-    public string GroupName { get; set; }
-    public string Specialty { get; set; }
-    public int Course { get; set; }
+    private List<UniversityMember> _members = new List<UniversityMember>();
+    private GradeRecord[] _gradeHistory;
+    private Point[] _labLocations;
 
-    public int GroupSize => _students.Count;
-    public void AssignStudentToPort(Student s, int row, int col)
-    {
-        s.PortRow = row;
-        s.PortCol = col;
-    }
+    public string GroupName { get; set; } = "К-321";
+    public string Specialty { get; set; } = "Комп'ютерна інженерія";
 
-    public List<Student> GetStudentsByPortStatus(bool isOpen)
-    {
-        return _students.Where(s =>
-        {
-            if (s.PortRow == -1 || s.PortCol == -1)
-                return false;
+    public int GroupSize => _members.Count;
 
-            return isOpen;
-        }).ToList();
-    }
     public double AverageGroupGrade
     {
         get
         {
-            if (_students.Count == 0) return 0;
-            return Math.Round(_students.Average(s => s.AverageGrade), 2);
+            var students = _members.OfType<Student>().ToList();
+            return students.Count == 0 ? 0 : Math.Round(students.Average(s => s.AverageGrade), 2);
         }
     }
 
-    public void AddStudent(Student s)
+    public void OptimizeStorage()
     {
-        if (s != null)
+        var students = _members.OfType<Student>().ToList();
+        _gradeHistory = new GradeRecord[students.Count];
+        _labLocations = new Point[students.Count];
+
+        for (int i = 0; i < students.Count; i++)
         {
-            _students.Add(s);
+            _labLocations[i] = new Point(i + 1, 1);
+            _gradeHistory[i] = new GradeRecord("Програмування", (int)students[i].AverageGrade);
         }
     }
 
-    public bool RemoveStudent(string recordBookNumber)
+    public StudentRecord[] GetAllRecords()
     {
-        var student = _students.FirstOrDefault(s => s.RecordBookNumber == recordBookNumber);
-        if (student != null)
+        var students = _members.OfType<Student>().ToList();
+        StudentRecord[] records = new StudentRecord[students.Count];
+        for (int i = 0; i < students.Count; i++)
         {
-            _students.Remove(student);
+            records[i] = students[i].GetRecord();
+        }
+        return records;
+    }
+
+    public void AddMember(UniversityMember member)
+    {
+        _members.Add(member);
+    }
+
+    public bool RemoveMember(string recordNumber)
+    {
+        var member = _members.OfType<Student>().FirstOrDefault(s => s.RecordBookNumber == recordNumber);
+        if (member != null)
+        {
+            _members.Remove(member);
             return true;
         }
         return false;
     }
 
-    public Student FindStudent(string nameOrNumber, bool searchByNumber = false)
+    public double GetTotalAreaOfAllShapes()
     {
-        if (searchByNumber)
-            return _students.FirstOrDefault(s => s.RecordBookNumber == nameOrNumber);
-
-        return _students.FirstOrDefault(s => s.FullName.Contains(nameOrNumber, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public List<Student> GetExcellentStudents()
-    {
-        return _students.Where(s => s.IsExcellent()).ToList();
-    }
-
-    public List<Student> GetStudentsByStatus(Student.StudentStatus status)
-    {
-        return _students.Where(s => s.Status == status).ToList();
-    }
-
-    public List<Student> GetFailingStudents()
-    {
-        return _students.Where(s => s.IsFailing()).ToList();
-    }
-
-    public List<Student> GetAllStudents()
-    {
-        return _students;
-    }
-
-    public void SaveToFile(string fileName)
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        string jsonString = JsonSerializer.Serialize(_students, options);
-        File.WriteAllText(fileName, jsonString);
-    }
-
-    public void LoadFromFile(string fileName)
-    {
-        if (File.Exists(fileName))
+        double totalArea = 0;
+        foreach (var student in _members.OfType<Student>())
         {
-            string jsonString = File.ReadAllText(fileName);
-            _students = JsonSerializer.Deserialize<List<Student>>(jsonString) ?? new List<Student>();
+            foreach (var shape in student.Shapes)
+            {
+                totalArea += shape.CalculateArea();
+            }
+        }
+        return Math.Round(totalArea, 2);
+    }
+
+    public void DrawAllShapes()
+    {
+        foreach (var student in _members.OfType<Student>())
+        {
+            foreach (var shape in student.Shapes)
+            {
+                if (shape is IDrawable drawable)
+                {
+                    drawable.Draw();
+                }
+            }
         }
     }
-    
+
+    public void ResizeAllShapes(double factor)
+    {
+        foreach (var student in _members.OfType<Student>())
+        {
+            foreach (var shape in student.Shapes)
+            {
+                if (shape is IResizable resizable)
+                {
+                    resizable.Resize(factor);
+                }
+            }
+        }
+    }
+
+    public Student FindStudent(string query, bool byNumber = false)
+    {
+        var students = _members.OfType<Student>();
+        if (byNumber)
+            return students.FirstOrDefault(s => s.RecordBookNumber == query);
+
+        return students.FirstOrDefault(s => s.FullName.Contains(query, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public List<Student> GetAllStudents() => _members.OfType<Student>().ToList();
+
+    public List<UniversityMember> GetAllMembers() => _members;
+
+    public decimal GetTotalScholarship()
+    {
+        return _members.Sum(m => m.CalculateScholarship());
+    }
+
+    public List<T> GetMembersByType<T>() where T : UniversityMember
+    {
+        return _members.OfType<T>().ToList();
+    }
+
+    public string SearchByNameFragment(string fragment)
+    {
+        StringBuilder sb = new StringBuilder();
+        var result = _members.OfType<Student>().Where(s =>
+            s.FullName.Contains(fragment, StringComparison.OrdinalIgnoreCase));
+
+        foreach (var s in result)
+            sb.AppendLine(s.GetFormattedInfo());
+
+        return sb.ToString();
+    }
+
+    public string ExportToCsv()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.AppendLine("ПІБ,Заліковка,Бал");
+        foreach (var s in _members.OfType<Student>())
+        {
+            sb.AppendLine($"{s.FullName},{s.RecordBookNumber},{s.AverageGrade}");
+        }
+        return sb.ToString();
+    }
+
+    public void ImportStudentsFromText(string rawText)
+    {
+        string[] lines = rawText.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
+        {
+            string[] data = line.Split(';');
+            if (data.Length >= 4)
+            {
+                Student s = new Student(data[0], DateTime.Parse(data[3]), data[1], data[2]);
+                AddMember(s);
+            }
+        }
+    }
+
+    public void SaveToFile(string file)
+    {
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        string json = JsonSerializer.Serialize(_members, options);
+        File.WriteAllText(file, json);
+    }
+
+    public void LoadFromFile(string file)
+    {
+        if (File.Exists(file))
+        {
+            string json = File.ReadAllText(file);
+            _members = JsonSerializer.Deserialize<List<UniversityMember>>(json) ?? new List<UniversityMember>();
+        }
+    }
 }
