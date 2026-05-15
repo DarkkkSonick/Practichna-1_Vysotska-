@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.IO;
+using YourProjectName;
 
 public class StudentGroup
 {
     private List<UniversityMember> _members = new List<UniversityMember>();
+    private GradeRecord[] _gradeHistory;
+    private Point[] _labLocations;
 
     public string GroupName { get; set; } = "К-321";
     public string Specialty { get; set; } = "Комп'ютерна інженерія";
@@ -21,6 +24,30 @@ public class StudentGroup
             var students = _members.OfType<Student>().ToList();
             return students.Count == 0 ? 0 : Math.Round(students.Average(s => s.AverageGrade), 2);
         }
+    }
+
+    public void OptimizeStorage()
+    {
+        var students = _members.OfType<Student>().ToList();
+        _gradeHistory = new GradeRecord[students.Count];
+        _labLocations = new Point[students.Count];
+
+        for (int i = 0; i < students.Count; i++)
+        {
+            _labLocations[i] = new Point(i + 1, 1);
+            _gradeHistory[i] = new GradeRecord("Програмування", (int)students[i].AverageGrade);
+        }
+    }
+
+    public StudentRecord[] GetAllRecords()
+    {
+        var students = _members.OfType<Student>().ToList();
+        StudentRecord[] records = new StudentRecord[students.Count];
+        for (int i = 0; i < students.Count; i++)
+        {
+            records[i] = students[i].GetRecord();
+        }
+        return records;
     }
 
     public void AddMember(UniversityMember member)
@@ -37,6 +64,47 @@ public class StudentGroup
             return true;
         }
         return false;
+    }
+
+    public double GetTotalAreaOfAllShapes()
+    {
+        double totalArea = 0;
+        foreach (var student in _members.OfType<Student>())
+        {
+            foreach (var shape in student.Shapes)
+            {
+                totalArea += shape.CalculateArea();
+            }
+        }
+        return Math.Round(totalArea, 2);
+    }
+
+    public void DrawAllShapes()
+    {
+        foreach (var student in _members.OfType<Student>())
+        {
+            foreach (var shape in student.Shapes)
+            {
+                if (shape is IDrawable drawable)
+                {
+                    drawable.Draw();
+                }
+            }
+        }
+    }
+
+    public void ResizeAllShapes(double factor)
+    {
+        foreach (var student in _members.OfType<Student>())
+        {
+            foreach (var shape in student.Shapes)
+            {
+                if (shape is IResizable resizable)
+                {
+                    resizable.Resize(factor);
+                }
+            }
+        }
     }
 
     public Student FindStudent(string query, bool byNumber = false)

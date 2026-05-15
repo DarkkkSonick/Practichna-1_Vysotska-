@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using YourProjectName;
 
 public class Student : UniversityMember
 {
+    public List<Shape> Shapes { get; set; } = new List<Shape>();
     public enum StudentStatus { Active, AcademicLeave, Expelled, Graduated }
 
     private string _fullName;
@@ -52,6 +54,12 @@ public class Student : UniversityMember
     {
         RecordBookNumber = recordBook;
         Status = StudentStatus.Active;
+    }
+
+    public StudentRecord GetRecord()
+    {
+        int id = int.TryParse(RecordBookNumber, out int result) ? result : 0;
+        return new StudentRecord(id, FullName);
     }
 
     public override decimal CalculateScholarship()
