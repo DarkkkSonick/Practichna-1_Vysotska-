@@ -206,6 +206,7 @@ class Program
         Console.WriteLine(sb.ToString());
     }
 
+<<<<<<< HEAD
     static void ImportFromText()
     {
         Console.WriteLine("Введіть дані:");
@@ -256,3 +257,9 @@ class Program
         foreach (var item in v) item.Move();
     }
 }
+=======
+            logger.LogOperation("WRITE", r * 16 + c, "Записані дані");
+        }
+}
+// Фінальна перевірка ієрархії
+>>>>>>> feature/variant-1
