@@ -1,0 +1,15 @@
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\bin\Debug\net8.0\Practichna№1_Vysotska.exe
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\bin\Debug\net8.0\Practichna№1_Vysotska.deps.json
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\bin\Debug\net8.0\Practichna№1_Vysotska.runtimeconfig.json
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\bin\Debug\net8.0\Practichna№1_Vysotska.dll
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\bin\Debug\net8.0\Practichna№1_Vysotska.pdb
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.GeneratedMSBuildEditorConfig.editorconfig
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.AssemblyInfoInputs.cache
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.AssemblyInfo.cs
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.csproj.CoreCompileInputs.cache
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.sourcelink.json
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.dll
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\refint\Practichna№1_Vysotska.dll
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.pdb
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\Practichna№1_Vysotska.genruntimeconfig.cache
+D:\Practichna№1_Vysotska\Practichna№1_Vysotska\obj\Debug\net8.0\ref\Practichna№1_Vysotska.dll

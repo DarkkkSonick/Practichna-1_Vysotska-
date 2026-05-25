@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Practichna№1_Vysotska/1.0.0": {
+        "runtime": {
+          "Practichna№1_Vysotska.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Practichna№1_Vysotska/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
